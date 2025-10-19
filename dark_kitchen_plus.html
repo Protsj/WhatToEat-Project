@@ -1,0 +1,705 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Що приготувати? — Dark Kitchen Plus: Student Edition (Final)</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0b0c0d; --panel:#0f1112; --muted:#9aa0a6; --text:#e8eaed;
+    --accent:#ffb84d; --accent-strong:#ff7a2d;
+    --glass: rgba(255,255,255,0.03);
+    --radius:14px; --card-shadow: 0 10px 30px rgba(2,6,23,0.6);
+    --maxw:1200px;
+  }
+
+  /* Light theme variables (overridden when body.light present) */
+  body.light{
+    --bg:#f6f7f9; --panel:linear-gradient(180deg,#ffffff,#fbfbfb);
+    --muted:#6b6b6b; --text:#111827; --accent:#f6c466; --accent-strong:#ea8a3a;
+    --card-shadow: 0 12px 28px rgba(12,18,26,0.08);
+  }
+
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;font-family:Inter,system-ui,Arial;background:var(--bg);color:var(--text);
+    -webkit-font-smoothing:antialiased;display:flex;justify-content:center;padding:28px;
+  }
+
+  .container{width:100%;max-width:var(--maxw);display:grid;grid-template-columns:1fr 360px;gap:22px;align-items:start;}
+  header{grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;gap:12px}
+  .brand{display:flex;align-items:center;gap:14px}
+  .logo{width:64px;height:64px;border-radius:16px;background:linear-gradient(135deg,var(--accent),var(--accent-strong));display:flex;align-items:center;justify-content:center;font-weight:800;color:#221813;font-size:28px;box-shadow:0 8px 30px rgba(0,0,0,0.35)}
+  h1{margin:0;font-size:20px}
+  .sub{color:var(--muted);font-size:13px}
+
+  /* main panels */
+  .panel{background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));padding:18px;border-radius:var(--radius);box-shadow:var(--card-shadow);transition:all .22s}
+  body.light .panel{background:var(--panel);}
+
+  .fun{font-size:14px;color:var(--muted);margin-bottom:12px}
+  .controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:10px}
+  input[type="text"], select{width:100%;padding:12px 14px;border-radius:12px;border:1px solid rgba(255,255,255,0.03);background:transparent;color:inherit;font-size:15px;outline:none}
+  body.light input[type="text"], body.light select{border:1px solid rgba(0,0,0,0.06)}
+  .chips{display:flex;gap:8px;flex-wrap:wrap}
+  .chip{background:var(--glass);padding:8px 12px;border-radius:999px;color:var(--muted);font-size:13px;display:inline-flex;gap:8px;align-items:center}
+  .chip button{background:none;border:0;color:inherit;cursor:pointer;font-size:13px}
+
+  .btn{padding:10px 14px;border-radius:12px;border:0;font-weight:700;cursor:pointer}
+  .btn-accent{background:linear-gradient(180deg,var(--accent),var(--accent-strong));color:#221813}
+  .btn-ghost{background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--muted)}
+
+  /* results */
+  .results{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px;margin-top:12px}
+  .card{background:rgba(255,255,255,0.02);padding:12px;border-radius:12px;position:relative;overflow:hidden;transition:transform .18s,box-shadow .18s}
+  .card:hover{transform:translateY(-8px);box-shadow:0 22px 60px rgba(0,0,0,0.6)}
+  .thumb{height:120px;border-radius:10px;background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));display:flex;align-items:center;justify-content:center;font-size:44px}
+  .title{font-weight:700;margin-top:10px}
+  .meta{color:var(--muted);font-size:13px;margin-top:6px}
+  .missing{margin-top:8px;color:#ffdcb0;font-size:13px}
+  .actions{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+  .small{padding:6px 10px;border-radius:10px;background:rgba(255,255,255,0.02);cursor:pointer;font-size:13px}
+  .match{position:absolute;right:12px;top:12px;background:rgba(0,0,0,0.35);padding:6px 8px;border-radius:10px;font-size:13px}
+
+  /* sidebar */
+  .sidebar{position:sticky;top:28px;display:flex;flex-direction:column;gap:14px}
+  .side-section{padding:12px;border-radius:12px;background:var(--panel);box-shadow:var(--card-shadow)}
+
+  /* dialog overlay */
+  .overlay{position:fixed;inset:0;background:linear-gradient(180deg, rgba(2,6,9,0.65), rgba(2,6,9,0.85));display:flex;align-items:center;justify-content:center;z-index:9999}
+  .dialog{width:96%;max-width:760px;background:linear-gradient(180deg,#0f1112,#0b0c0d);border-radius:16px;padding:22px;color:var(--text);box-shadow:0 40px 120px rgba(0,0,0,0.7);animation:pop .26s ease}
+  @keyframes pop{from{transform:translateY(12px) scale(.98);opacity:0}to{transform:none;opacity:1}}
+  .step{display:none}
+  .step.active{display:block}
+  .options{display:flex;gap:12px;flex-wrap:wrap;margin-top:12px}
+  .option{min-width:120px;padding:12px;border-radius:12px;background:rgba(255,255,255,0.02);cursor:pointer;text-align:center;border:1px solid transparent;transition:all .18s}
+  .option:hover{transform:translateY(-6px);border-color:rgba(255,255,255,0.04)}
+  .option.selected{background:linear-gradient(180deg,var(--accent),var(--accent-strong));color:#221813}
+  .foot{display:flex;justify-content:space-between;align-items:center;margin-top:18px}
+  .small-muted{font-size:13px;color:var(--muted)}
+
+  /* utilities */
+  .hidden{display:none}
+  .muted{color:var(--muted)}
+  .badge{background:rgba(255,255,255,0.03);padding:6px 10px;border-radius:999px;font-size:13px;color:var(--muted)}
+  .reopen{background:transparent;border:1px dashed rgba(255,255,255,0.06);padding:8px 12px;border-radius:10px;color:var(--muted);cursor:pointer}
+  
+  /* Quick Cooker Select in Sidebar */
+  #quick-cooker-select .option, #category-filter-list .option{
+    min-width: unset; 
+    padding: 8px 12px; 
+    font-size: 13px;
+    background: rgba(255,255,255,0.02);
+  }
+  #quick-cooker-select .option.selected, #category-filter-list .option.selected{
+    background: linear-gradient(180deg, var(--accent), var(--accent-strong));
+    color: #221813;
+  }
+
+  /* responsive */
+  @media (max-width:1024px){ .container{grid-template-columns:1fr} .sidebar{position:static} }
+</style>
+</head>
+<body>
+  <div id="overlay" class="overlay">
+    <div class="dialog">
+      <div id="step-welcome" class="step active">
+        <h2>🍜 Привіт, бідолага!</h2>
+        <p class="small-muted">Я — Dark Kitchen Plus, твій гуртожитський шеф. Пройдемо кілька питань, щоби знайти, що готувати.</p>
+        <div class="foot">
+          <div class="small-muted">Статичний діалог — просто обирай.</div>
+          <div><button id="to-meal" class="btn btn-accent">Розпочати</button></div>
+        </div>
+      </div>
+
+      <div id="step-meal" class="step">
+        <h2>Коли готуємо?</h2>
+        <div class="options" id="meal-options">
+          <div class="option" data-val="breakfast">🍳 Сніданок</div>
+          <div class="option" data-val="lunch">🍝 Обід</div>
+          <div class="option" data-val="dinner">🌙 Вечеря</div>
+          <div class="option" data-val="late">🌚 Нічна шаурма</div>
+        </div>
+        <div class="foot">
+          <div class="small-muted">Оберіть один варіант</div>
+          <div><button id="meal-next" class="btn btn-accent" disabled>Далі →</button></div>
+        </div>
+      </div>
+
+      <div id="step-cooker" class="step">
+        <h2>На чому готуємо?</h2>
+        <div class="options" id="cooker-options">
+          <div class="option" data-val="gas">🔥 Газова плита</div>
+          <div class="option" data-val="electric">⚡ Електрична плита</div>
+          <div class="option" data-val="pan">🍳 Пательня</div>
+          <div class="option" data-val="pot">🍲 Каструля</div>
+          <div class="option" data-val="multi">🤖 Мультиварка</div>
+          <div class="option" data-val="kazan">🥣 Казан (плов на тиждень)</div>
+          <div class="option" data-val="micro">📡 Мікрохвильовка</div>
+          <div class="option" data-val="none">☕ Тільки чайник</div>
+        </div>
+
+        <div style="margin-top:12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+          <div class="badge" id="speed-badge">⏱ Швидкість: <strong id="speed-text">Нормально</strong></div>
+          <div class="options" style="margin-left:auto">
+            <div class="option" id="speed-fast" data-val="fast">⚡ Побыстрее</div>
+            <div class="option selected" id="speed-normal" data-val="normal">😌 Нормально</div>
+            <div class="option" id="speed-slow" data-val="slow">🐢 Повільно (старанно)</div>
+          </div>
+        </div>
+
+        <div class="foot">
+          <div id="cooker-hint" class="small-muted">Після вибору побачиш жартівливу підказку.</div>
+          <div><button id="cooker-next" class="btn btn-accent" disabled>Далі →</button></div>
+        </div>
+      </div>
+
+      <div id="step-summary" class="step">
+        <h2>Готово! Коротке резюме</h2>
+        <p id="summary" class="muted"></p>
+        <div class="foot">
+          <div class="small-muted">Можна змінити в налаштуваннях пізніше</div>
+          <div><button id="finish" class="btn btn-accent">Перейти до додатку</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container" id="app" style="opacity:0;transform:translateY(8px);transition:all .36s">
+    <header>
+      <div class="brand">
+        <div class="logo">🍳</div>
+        <div>
+          <h1>Що приготувати?</h1>
+          <div class="sub">Dark Kitchen Plus — Student Edition • <span id="selected-meal" class="muted">—</span> • <span id="selected-cooker" class="muted">—</span></div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:10px;align-items:center">
+        <button id="reopen-dialog" class="reopen" title="Змінити вибір">🔁 Змінити вибір</button>
+        <button id="theme-toggle" class="reopen" title="Тема">🌙</button>
+        <button id="random-btn" class="reopen" title="Випадкова страва">🎲</button>
+      </div>
+    </header>
+
+    <main>
+      <section class="panel">
+        <div class="fun" id="fun-msg">Привіт! Пройшли діалог — тепер додавай інгредієнти або натискай «Випадкова».</div>
+
+        <h3>Що є у тебе вдома?</h3>
+        <div class="chips" id="chips"></div>
+        <input id="ingredient-input" type="text" placeholder="Введи інгредієнти через кому (натисни Enter)"/>
+
+        <div class="controls">
+          <button id="find-btn" class="btn btn-accent">Знайти рецепти</button>
+          <button id="clear-btn" class="btn btn-ghost">Очистити</button>
+          <select id="filter-diff">
+            <option value="">Усі складності</option>
+            <option value="Легко">Легко</option>
+            <option value="Середньо">Середньо</option>
+            <option value="Важко">Важко</option>
+          </select>
+          <div class="badge" id="speed-current">⏱ Швидкість: <strong id="speed-current-text">Нормально</strong></div>
+        </div>
+      </section>
+
+      <section class="panel" style="margin-top:16px">
+        <h3>Пошук страви</h3>
+        <input id="search-input" type="text" placeholder="Введи назву страви"/>
+      </section>
+
+      <section class="panel" style="margin-top:16px">
+        <h3>Фільтри (Дієтичні)</h3>
+        <label style="display:block;margin-bottom:6px"><input type="checkbox" class="diet" value="vegan"> Веган</label>
+        <label style="display:block;margin-bottom:6px"><input type="checkbox" class="diet" value="glutenfree"> Безглютенове</label>
+        <label style="display:block"><input type="checkbox" class="diet" value="vegetarian"> Вегетаріанське</label>
+      </section>
+
+      <section id="history" class="panel" style="margin-top:16px"></section>
+
+      <section style="margin-top:16px">
+        <h3>Рецепти</h3>
+        <div id="results" class="results panel"></div>
+      </section>
+    </main>
+
+    <aside class="sidebar">
+      
+      <div class="side-section panel">
+        <h4>Категорії страв</h4>
+        <div class="options" id="category-filter-list" style="margin-top:8px">
+          <div class="option" data-val="oriental">🏮 Східні</div>
+          <div class="option" data-val="spicy">🌶️ Гострі</div>
+          <div class="option" data-val="quick">🚀 Швидкі (до 25 хв)</div>
+          <div class="option" data-val="student">🎓 Студентська Класика</div>
+        </div>
+      </div>
+      
+      <div class="side-section panel">
+        <h4>Швидка зміна посуду/плити</h4>
+        <div class="options" id="quick-cooker-select">
+          <div class="option" data-val="gas">🔥 Плита (газ)</div>
+          <div class="option" data-val="electric">⚡ Плита (ел.)</div>
+          <div class="option" data-val="pan">🍳 Пательня</div>
+          <div class="option" data-val="pot">🍲 Каструля</div>
+          <div class="option" data-val="multi">🤖 Мультиварка</div>
+          <div class="option" data-val="kazan">🥣 Казан</div>
+          <div class="option" data-val="micro">📡 Мікрохв.</div>
+          <div class="option" data-val="none">☕ Чайник</div>
+        </div>
+      </div>
+      
+      <div class="side-section panel">
+        <h4>Список покупок</h4>
+        <ul id="shopping-list"><li>Порожньо</li></ul>
+      </div>
+
+      <div class="side-section panel">
+        <h4>Улюблене</h4>
+        <ul id="favorites-list"><li>Пусто</li></ul>
+      </div>
+
+      <div class="side-section panel">
+        <h4>Налаштування швидкості</h4>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
+          <button class="btn btn-ghost" id="ui-speed-fast">⚡ Побыстрее</button>
+          <button class="btn btn-ghost" id="ui-speed-normal">😌 Нормально</button>
+          <button class="btn btn-ghost" id="ui-speed-slow">🐢 Повільно</button>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+<script>
+/* ---------- Рецепти (оновлено) ---------- */
+const RECIPES = [
+ {id:'r1',title:'Яєчня з картоплею',ingredients:['яйця','картопля','сіль','масло'],time:15,difficulty:'Легко',diet:[],categories:['quick','student'],steps:['Нарізати картоплю й підсмажити.','Додати яйця та масло.']},
+ {id:'r2',title:'Овочеве рагу',ingredients:['картопля','морква','цибуля','помідор','кабачок'],time:40,difficulty:'Середньо',diet:['vegan','glutenfree'],categories:['student'],steps:['Обсмажити овочі, тушкувати з томатом.']},
+ {id:'r3',title:'Паста з соусом',ingredients:['макарони','помідор','часник','сир'],time:25,difficulty:'Легко',diet:['vegetarian'],categories:['quick','student'],steps:['Зварити макарони.','Зробити соус.','Змішати.']},
+ {id:'r4',title:'Салат з овочів',ingredients:['огірок','помідор','цибуля','олія'],time:10,difficulty:'Легко',diet:['vegan','glutenfree'],categories:['quick'],steps:['Нарізати овочі, заправити олією.']},
+ {id:'r5',title:'Гострі курячі стегенця',ingredients:['курка','часник','паприка','перець чилі','соєвий соус'],time:60,difficulty:'Важко',diet:['glutenfree'],categories:['spicy'],steps:['Замаринувати в гострому соусі.','Запекти.']},
+ {id:'r6',title:'Омлет з овочами',ingredients:['яйця','помідор','цибуля','масло'],time:12,difficulty:'Легко',diet:['vegetarian'],categories:['quick','student'],steps:['Збити яйця.','Додати овочі на сковорідку.','Смажити до готовності.']},
+ {id:'r7',title:'Паста карбонара',ingredients:['макарони','яйця','сир','бекон'],time:20,difficulty:'Середньо',diet:[],categories:['student'],steps:['Зварити пасту.','Обсмажити бекон.','Змішати з яйцем та сиром.']},
+ // Нові рецепти
+ {id:'r8',title:'Гострий суп Рамен (Швидкий)',ingredients:['локшина швидкого приготування','яйця','зелена цибуля','соус шрірача'],time:8,difficulty:'Легко',diet:[],categories:['oriental','spicy','quick'],steps:['Заварити локшину. Додати всі інгредієнти та гострий соус.']},
+ {id:'r9',title:'Гречка по-східному',ingredients:['гречка','куряче філе','соєвий соус','морква'],time:35,difficulty:'Середньо',diet:['glutenfree'],categories:['oriental'],steps:['Зварити гречку. Обсмажити курку та овочі. Змішати, додати соєвий соус.']},
+ {id:'r10',title:'Казан плову (на тиждень)',ingredients:['рис','мʼясо','морква','цибуля','рослинна олія','спеції'],time:120,difficulty:'Важко',diet:[],categories:['oriental'],steps:['Підготувати інгредієнти, обсмажити мʼясо.','Додати рис, залити водою, варити до готовності.','Розділити по контейнерах — їжа на тиждень.']}
+];
+
+/* ---------- DOM ---------- */
+const overlay = document.getElementById('overlay');
+const steps = { welcome: document.getElementById('step-welcome'), meal: document.getElementById('step-meal'), cooker: document.getElementById('step-cooker'), summary: document.getElementById('step-summary') };
+const mealNextBtn = document.getElementById('meal-next'), cookerNextBtn = document.getElementById('cooker-next');
+const toMeal = document.getElementById('to-meal'), finishBtn = document.getElementById('finish');
+const summaryEl = document.getElementById('summary');
+const funMsg = document.getElementById('fun-msg');
+const app = document.getElementById('app');
+const selectedMealLabel = document.getElementById('selected-meal');
+const selectedCookerLabel = document.getElementById('selected-cooker');
+const speedCurrentText = document.getElementById('speed-current-text');
+const speedBadgeText = document.getElementById('speed-text');
+
+/* ---------- App DOM ---------- */
+const chips = document.getElementById('chips'), input = document.getElementById('ingredient-input'), results = document.getElementById('results');
+const shoppingList = document.getElementById('shopping-list'), favList = document.getElementById('favorites-list'), historySection = document.getElementById('history');
+const findBtn = document.getElementById('find-btn'), clearBtn = document.getElementById('clear-btn'), searchInput = document.getElementById('search-input');
+const randomBtn = document.getElementById('random-btn'), themeToggle = document.getElementById('theme-toggle'), reopenDialog = document.getElementById('reopen-dialog');
+const filterDiff = document.getElementById('filter-diff');
+const quickCookerSelect = document.getElementById('quick-cooker-select');
+const categoryFilterList = document.getElementById('category-filter-list'); // NEW category list element
+
+/* ---------- State & persistence ---------- */
+let selected = new Set();
+let shopping = new Set(JSON.parse(localStorage.getItem('dk_shop')||'[]'));
+let favs = new Set(JSON.parse(localStorage.getItem('dk_fav')||'[]'));
+let likes = new Map(JSON.parse(localStorage.getItem('dk_likes')||'[]'));
+if(!(likes instanceof Map)) likes = new Map(likes);
+
+// Initialize with stored or default values
+let chosenMeal = localStorage.getItem('dk_meal') || '';
+let chosenCooker = localStorage.getItem('dk_cooker') || 'pan'; // default to pan if not set
+let chosenSpeed = localStorage.getItem('dk_speed') || 'normal'; // speed: fast / normal / slow
+let activeCategoryFilter = localStorage.getItem('dk_category_filter') || ''; // NEW active category filter
+
+/* ---------- Helpers ---------- */
+function persistSet(key, set){ localStorage.setItem('dk_'+key, JSON.stringify([...set])); }
+function persistLikes(){ localStorage.setItem('dk_likes', JSON.stringify([...likes])); }
+function persistSettings(){
+    localStorage.setItem('dk_meal', chosenMeal);
+    localStorage.setItem('dk_cooker', chosenCooker);
+    localStorage.setItem('dk_speed', chosenSpeed);
+    localStorage.setItem('dk_category_filter', activeCategoryFilter); // Persist category filter
+}
+
+/* ---------- Render UI ---------- */
+function renderChips(){
+  chips.innerHTML = '';
+  [...selected].forEach(i=>{
+    const el = document.createElement('span'); el.className='chip';
+    el.innerHTML = `${i} <button title="видалити">✕</button>`;
+    el.querySelector('button').onclick = ()=>{ selected.delete(i); renderChips(); };
+    chips.appendChild(el);
+  });
+}
+
+function renderShopping(){ shoppingList.innerHTML = [...shopping].length ? [...shopping].map(i=>`<li>${i}</li>`).join('') : '<li>Порожньо</li>'; persistSet('shop', shopping); }
+function renderFavs(){ favList.innerHTML = [...favs].length ? [...favs].map(id=>{ let r = RECIPES.find(x=>x.id===id); return `<li>${r? r.title : id}</li>` }).join('') : '<li>Пусто</li>'; persistSet('fav', favs); }
+function renderHist(){ let h = JSON.parse(localStorage.getItem('dk_hist')||'[]'); historySection.innerHTML = '<h4>Недавні інгредієнти</h4>' + (h.length ? h.map(x=>`<div class="chip" style="margin:6px 6px 0 0">${x}</div>`).join('') : '<div class="muted">Немає даних</div>'); }
+
+function updateHeaderLabels(){
+    selectedMealLabel.textContent = chosenMeal || '—';
+    selectedCookerLabel.textContent = chosenCooker || '—';
+}
+
+function updateQuickCookerUI(){
+    // Update selected state in the Quick Cooker section
+    quickCookerSelect.querySelectorAll('.option').forEach(o => {
+        o.classList.remove('selected');
+        if (o.dataset.val === chosenCooker) {
+            o.classList.add('selected');
+        }
+    });
+}
+
+function updateCategoryFilterUI(){
+    // Update selected state in the Category Filter section
+    categoryFilterList.querySelectorAll('.option').forEach(o => {
+        o.classList.remove('selected');
+        if (o.dataset.val === activeCategoryFilter) {
+            o.classList.add('selected');
+        }
+    });
+}
+
+/* ---------- Ingredients ---------- */
+function addIngredient(text){
+  text.split(',').map(s=>s.trim().toLowerCase()).filter(Boolean).forEach(x=>{ selected.add(x); saveHistory(x); });
+  input.value=''; renderChips();
+}
+input.addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); addIngredient(input.value); showRecipes(); } });
+
+function saveHistory(item){
+  let h = JSON.parse(localStorage.getItem('dk_hist')||'[]');
+  h = h.filter(x=>x!==item); h.unshift(item); if(h.length>12) h=h.slice(0,12);
+  localStorage.setItem('dk_hist', JSON.stringify(h)); renderHist();
+}
+
+/* ---------- Recipes logic ---------- */
+function showRecipes(){
+  const sel = [...selected];
+  const search = (searchInput.value||'').toLowerCase();
+  const dietFilters = [...document.querySelectorAll('.diet:checked')].map(cb=>cb.value);
+  // const categoryFilters = [...document.querySelectorAll('.category:checked')].map(cb=>cb.value); // Old checkbox logic, replaced by activeCategoryFilter
+
+  let prep = RECIPES.map(r=>{
+    const matched = r.ingredients.filter(i=>selected.has(i));
+    const miss = r.ingredients.filter(i=>!selected.has(i));
+    const score = (matched.length / r.ingredients.length) + ((likes.get(r.id) || 0) * 0.2);
+    return {...r, matched, miss, score};
+  });
+
+  // SPEED & COOKER LOGIC
+  if(chosenSpeed==='fast') prep = prep.map(r=> ({...r, score: r.score + (r.time<=25?0.15: r.id==='r10' ? -0.8 : -0.4)}));
+  if(chosenSpeed==='slow') prep = prep.map(r=> ({...r, score: r.score + (r.time>40?0.12:0)}));
+  if(chosenCooker==='kazan') prep = prep.map(r=> ({...r, score: r.score + (r.id==='r10'?0.6:0)}));
+  // Special cooker logic for Ramens / quick items if only 'none' (kettle) is selected
+  if(chosenCooker==='none') prep = prep.map(r=> ({...r, score: r.score + (r.id==='r8'?0.5: r.time > 15 ? -0.5 : 0.1)})); 
+
+
+  // Filters
+  if(sel.length) prep = prep.filter(r=>r.matched.length>0);
+  if(search) prep = prep.filter(r=>r.title.toLowerCase().includes(search));
+  if(filterDiff.value) prep = prep.filter(r=>r.difficulty === filterDiff.value);
+  if(dietFilters.length) prep = prep.filter(r=>dietFilters.every(d=>r.diet.includes(d)));
+  
+  // Apply the SINGLE active category filter
+  if(activeCategoryFilter) prep = prep.filter(r=>r.categories.includes(activeCategoryFilter)); 
+
+  prep.sort((a,b)=>b.score - a.score);
+
+  results.innerHTML = prep.length ? '' : '<div class="panel">Нічого не знайдено... Може, час сходити в магазин? 🥲</div>';
+  prep.forEach(r=>{
+    const card = document.createElement('div'); card.className='card';
+    card.innerHTML = `<div class="thumb">${getEmoji(r.id)}</div>
+      <div class="title">${r.title}</div>
+      <div class="meta">⏱ ${r.time} хв • ${r.difficulty} • ${r.categories.map(c => getCategoryEmoji(c)).join(' ')}</div>
+      <div class="missing">${r.miss.length ? 'Потрібно: ' + r.miss.join(', ') : '✅ Усе є — вражай сусідів!'}</div>
+      <div class="actions">
+        <button class="small" data-act="shop">🛒</button>
+        <button class="small" data-act="fav">${favs.has(r.id) ? '★' : '☆'}</button>
+        <button class="small" data-act="like">👍</button>
+        <button class="small" data-act="dislike">👎</button>
+      </div>
+      <div class="match">${Math.round(r.score*100)}%</div>
+    `;    
+    card.querySelector('[data-act="shop"]').onclick = ()=>{ r.miss.forEach(m=>shopping.add(m)); renderShopping(); };
+    card.querySelector('[data-act="fav"]').onclick = ()=>{ if(favs.has(r.id)) favs.delete(r.id); else favs.add(r.id); renderFavs(); showRecipes(); };
+    card.querySelector('[data-act="like"]').onclick = ()=>{ likes.set(r.id, (likes.get(r.id)||0)+1); persistLikes(); showRecipes(); };
+    card.querySelector('[data-act="dislike"]').onclick = ()=>{ likes.set(r.id, (likes.get(r.id)||0)-1); persistLikes(); showRecipes(); };
+    card.ondblclick = ()=> openModal(r);
+    card.oncontextmenu = (e)=>{ e.preventDefault(); openStep(r); };
+    results.appendChild(card);
+  });
+}
+
+/* ---------- Emoji mapping ---------- */
+function getEmoji(id){ return {r1:"🍳",r2:"🥘",r3:"🍝",r4:"🥗",r5:"🍗",r6:"🍳",r7:"🍝",r8:"🍜",r9:"🍚",r10:"🥣"}[id]||"🍴"; }
+function getCategoryEmoji(cat){
+    return {
+        oriental: '🏮',
+        spicy: '🌶️',
+        quick: '🚀',
+        student: '🎓'
+    }[cat] || '';
+}
+
+/* ---------- Modals (unchanged) ---------- */
+function openModal(r){
+  const o = document.createElement('div'); o.style = "position:fixed;inset:0;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;z-index:99999";
+  const b = document.createElement('div'); b.style = "background:var(--panel);padding:20px;border-radius:12px;max-width:720px;width:92%;color:var(--text)";
+  b.innerHTML = `<h3>${r.title}</h3><div style="color:var(--muted)">⏱ ${r.time} хв • ${r.difficulty}</div><hr style="border:none;border-top:1px solid rgba(255,255,255,0.04)"><ol style="margin:12px 0 0 18px">${r.steps.map(s=>`<li style="margin-bottom:8px">${s}</li>`).join('')}</ol><div style="margin-top:14px;display:flex;gap:8px;justify-content:flex-end"><button id="close-modal" class="btn btn-ghost">Закрити</button></div>`;
+  o.appendChild(b); document.body.appendChild(o);
+  document.getElementById('close-modal').onclick = ()=> o.remove();
+}
+
+function openStep(r){
+  let step = 0;
+  const o = document.createElement('div'); o.style = "position:fixed;inset:0;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;z-index:99999";
+  const b = document.createElement('div'); b.style = "background:var(--panel);padding:20px;border-radius:12px;max-width:520px;width:92%;color:var(--text);text-align:center";
+  const text = document.createElement('div'); text.style = "margin-bottom:14px"; text.textContent = r.steps[step];
+  const btn = document.createElement('button'); btn.className = 'btn btn-accent'; btn.textContent = 'Наступний';
+  btn.onclick = ()=>{ if(step < r.steps.length-1){ step++; text.textContent = r.steps[step]; } else o.remove(); };
+  b.append(text, btn); o.appendChild(b); document.body.appendChild(o);
+}
+
+/* ---------- Random button (unchanged) ---------- */
+randomBtn.onclick = ()=> {
+  const jokes = ["🎲 Доля вирішила: готуй щось смачне!", "Холодильник каже: я порожній, але ти можеш щось придумати 😅", "Пора творити! Я вибираю страву за тебе..."];
+  alert(jokes[Math.floor(Math.random()*jokes.length)]);
+  const r = RECIPES[Math.floor(Math.random()*RECIPES.length)];
+  selected = new Set(r.ingredients); renderChips(); showRecipes();
+};
+
+/* ---------- Event bindings (updated) ---------- */
+findBtn.onclick = ()=> showRecipes();
+clearBtn.onclick = ()=>{ selected.clear(); renderChips(); results.innerHTML=''; };
+searchInput.oninput = showRecipes;
+filterDiff.onchange = showRecipes; // Rerun filter on difficulty change
+document.querySelectorAll('.diet').forEach(cb=>cb.onchange = showRecipes); 
+
+// theme toggle (works now)
+const themeBtn = document.getElementById('theme-toggle');
+function applyThemeClass(){
+  if(localStorage.getItem('dk_theme') === 'light'){ document.body.classList.add('light'); themeBtn.textContent='🌞'; }
+  else { document.body.classList.remove('light'); themeBtn.textContent='🌙'; }
+}
+applyThemeClass();
+themeBtn.onclick = ()=>{
+  if(document.body.classList.contains('light')){ document.body.classList.remove('light'); localStorage.setItem('dk_theme','dark'); themeBtn.textContent='🌙'; }
+  else { document.body.classList.add('light'); localStorage.setItem('dk_theme','light'); themeBtn.textContent='🌞'; }
+};
+
+/* ---------- Dialog logic (mostly unchanged) ---------- */
+function switchStep(from, to){
+  if(from) from.classList.remove('active'); if(to) to.classList.add('active');
+}
+
+toMeal.onclick = ()=> { switchStep(steps.welcome, steps.meal); };
+let mealChosen = null;
+document.querySelectorAll('#meal-options .option').forEach(o=>{
+  o.onclick = ()=>{
+    document.querySelectorAll('#meal-options .option').forEach(x=>x.classList.remove('selected'));
+    o.classList.add('selected'); mealChosen = o.dataset.val; mealNextBtn.disabled = false;
+  };
+});
+mealNextBtn.onclick = ()=>{
+  chosenMeal = mealChosen || '';
+  updateHeaderLabels();
+  // fun message
+  funMsg.textContent = chosenMeal === 'breakfast' ? 'Сніданок — не проспи пару!' : chosenMeal === 'lunch' ? 'Обід — час насищатись!' : chosenMeal === 'dinner' ? 'Вечеря — тихо, щоб не будити сусідів' : 'Нічна лихоманка — готуй на совість';
+  switchStep(steps.meal, steps.cooker);
+};
+
+let cookerChosen = null;
+document.querySelectorAll('#cooker-options .option').forEach(o=>{
+  o.onclick = ()=>{
+    document.querySelectorAll('#cooker-options .option').forEach(x=>x.classList.remove('selected'));
+    o.classList.add('selected'); cookerChosen = o.dataset.val; cookerNextBtn.disabled = false;
+    const hints = {
+      gas: 'Ого, газова плита? Ти майже шейх у гуртожитку! 💸',
+      electric: 'Електрична — стабільно і по-цінивськи.',
+      pan: 'Пательня — універсальний солдат.',
+      pot: 'Каструля — те, що треба для супів і рагу.',
+      multi: 'Мультиварка — важка артилерія для ледачих королів.',
+      kazan: 'Казан! Готуй плов на тиждень — сусіди заздрять.',
+      micro: 'Мікрохвильовка — швидко, але не завжди смачно.',
+      none: 'Тільки чайник? Буде творчо!'
+    };
+    document.getElementById('cooker-hint').textContent = hints[cookerChosen] || '';
+  };
+});
+
+// speed options
+let speedChosen = 'normal';
+document.getElementById('speed-fast').onclick = ()=> selectSpeed('fast', true);
+document.getElementById('speed-normal').onclick = ()=> selectSpeed('normal', true);
+document.getElementById('speed-slow').onclick = ()=> selectSpeed('slow', true);
+function selectSpeed(s, updateDialog = false){
+  speedChosen = s; chosenSpeed = s;
+  // Update UI in dialog and main
+  document.querySelectorAll('#step-cooker .options .option').forEach(x=>x.classList.remove('selected'));
+  if(updateDialog){
+      if(s==='fast') document.getElementById('speed-fast').classList.add('selected');
+      if(s==='normal') document.getElementById('speed-normal').classList.add('selected');
+      if(s==='slow') document.getElementById('speed-slow').classList.add('selected');
+  }
+
+  document.getElementById('speed-text').textContent = s==='fast' ? 'Побыстрее' : s==='slow' ? 'Повільно' : 'Нормально';
+  document.getElementById('speed-current-text').textContent = document.getElementById('speed-text').textContent;
+  persistSettings();
+}
+
+cookerNextBtn.onclick = ()=>{
+  chosenCooker = cookerChosen || 'pan';
+  updateHeaderLabels();
+  updateQuickCookerUI(); // Initial update for quick cooker selector
+  selectSpeed(chosenSpeed); // Ensure speed is correctly applied
+  summaryEl.textContent = `Ти обрав: ${chosenMeal || '—'}; готуватимеш на: ${chosenCooker || '—'}; швидкість — ${chosenSpeed}.`;
+  switchStep(steps.cooker, steps.summary);
+};
+
+finishBtn.onclick = ()=>{
+  overlay.style.display = 'none';
+  // Final checks and settings save
+  chosenCooker = chosenCooker || 'pan'; // Final fallback
+  persistSettings();
+  
+  // small fun final message
+  if(chosenCooker==='kazan'){ funMsg.textContent = 'Казан обрано — готуй плов на тиждень! Я підсвітлю його у результатах.'; }
+  else if(chosenCooker==='gas'){ funMsg.textContent = 'Газ є — ти король гуртожитку!'; }
+  else funMsg.textContent = 'Готово — приступай до інгредієнтів!';
+  
+  updateQuickCookerUI(); // Apply final cooker choice to sidebar
+  updateCategoryFilterUI(); // Apply initial category state
+  selectSpeed(chosenSpeed);
+  app.style.opacity = 1; app.style.transform = 'none';
+  // show recipes initial
+  showRecipes();
+};
+
+/* ---------- Reopen dialog (unchanged) ---------- */
+reopenDialog.onclick = ()=>{
+  overlay.style.display = 'flex';
+  // reset overlay steps to welcome
+  for(let k in steps){ steps[k].classList.remove('active'); }
+  steps.welcome.classList.add('active');
+};
+
+/* ---------- UI speed from sidebar (unchanged) ---------- */
+document.getElementById('ui-speed-fast').onclick = ()=> { selectSpeed('fast'); showRecipes(); };
+document.getElementById('ui-speed-normal').onclick = ()=> { selectSpeed('normal'); showRecipes(); };
+document.getElementById('ui-speed-slow').onclick = ()=> { selectSpeed('slow'); showRecipes(); };
+
+/* ---------- Quick Cooker Change Logic (Feedback/Обратная связь) ---------- */
+quickCookerSelect.querySelectorAll('.option').forEach(o => {
+    o.onclick = () => {
+        chosenCooker = o.dataset.val;
+        updateHeaderLabels();
+        updateQuickCookerUI();
+        persistSettings();
+        showRecipes(); // Rerun recipe filter with new cooker
+        
+        // Update fun message with new cooker context
+        const funHints = {
+            gas: 'Перемикання: Газ є — ти король гуртожитку!',
+            electric: 'Перемикання: Електрика — надійність у твоїх руках.',
+            pot: 'Перемикання: Каструля — час для супу чи рагу!',
+            pan: 'Перемикання: Пательня — універсальний вибір.',
+            micro: 'Перемикання: Мікрохвильовка — супершвидко.',
+            none: 'Перемикання: Тільки чайник — мінімалізм!',
+            kazan: 'Перемикання: Казан! Вже чую запах плову.',
+            multi: 'Перемикання: Мультиварка — для ледачих королів.',
+        };
+        funMsg.textContent = funHints[chosenCooker] || 'Вибір посуду змінено. Готуємо!';
+    };
+});
+
+/* ---------- Category Filter Logic (New sidebar section) ---------- */
+categoryFilterList.querySelectorAll('.option').forEach(o => {
+    o.onclick = () => {
+        const selectedCategory = o.dataset.val;
+        
+        // Toggle logic: if the same category is clicked, turn off the filter
+        if (activeCategoryFilter === selectedCategory) {
+            activeCategoryFilter = '';
+        } else {
+            activeCategoryFilter = selectedCategory;
+        }
+
+        updateCategoryFilterUI(); // Update visual state
+        persistSettings();
+        showRecipes(); // Rerun recipe filter
+        
+        if (activeCategoryFilter) {
+            funMsg.textContent = `Ввімкнено фільтр: ${o.textContent.trim()}. Готуй щось особливе!`;
+        } else {
+            funMsg.textContent = 'Фільтр категорій вимкнено. Дивимося всі рецепти.';
+        }
+    };
+});
+
+
+/* ---------- Initialize saved state & render ---------- */
+function init(){
+  renderShopping(); renderFavs(); renderHist(); renderChips();
+  // apply last theme
+  if(localStorage.getItem('dk_theme') === 'light'){ document.body.classList.add('light'); document.getElementById('theme-toggle').textContent='🌞' }
+  else document.getElementById('theme-toggle').textContent='🌙';
+  
+  // If settings exist, hide dialog and show app immediately
+  if (chosenMeal || chosenCooker !== 'pan') { // Check if user completed the initial flow before
+      overlay.style.display = 'none';
+      app.style.opacity = 1; app.style.transform = 'none';
+      updateHeaderLabels();
+      updateQuickCookerUI();
+      updateCategoryFilterUI(); // Apply category state on init
+      selectSpeed(chosenSpeed);
+      funMsg.textContent = 'Радісно знову бачити тебе! Почнімо готувати.';
+      showRecipes();
+  } else {
+      // Show app hidden until dialog finished
+      app.style.opacity = 0; app.style.transform = 'translateY(8px)';
+  }
+}
+init();
+
+/* ---------- Save on unload (updated) ---------- */
+window.addEventListener('beforeunload', ()=>{ persistSet('shop', shopping); persistSet('fav', favs); persistLikes(); persistSettings(); });
+
+</script>
+<script>
+async function loadRecipes() {
+  const response = await fetch("/recipes");
+  const data = await response.json();
+  const container = document.getElementById("recipeContainer");
+  container.innerHTML = "";
+
+  data.forEach(recipe => {
+    const card = document.createElement("div");
+    card.classList.add("recipe-card");
+    card.innerHTML = `
+      <h3>${recipe.title}</h3>
+      <p>Час: ${recipe.time_minutes} хв</p>
+      <p>Складність: ${recipe.difficulty}</p>
+    `;
+    container.appendChild(card);
+  });
+}
+
+window.onload = loadRecipes;
+</script>
+
+</body>
+</html>
