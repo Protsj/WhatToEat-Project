@@ -1,0 +1,11 @@
+{
+  "name": "whatttoeat",
+  "version": "1.0.0",
+  "scripts": {
+    "test": "jest",
+    "build": "echo 'Building site...' && mkdir -p dist && cp -r *.html dist/"
+  },
+  "devDependencies": {
+    "jest": "^29.0.0"
+  }
+}
