@@ -1,0 +1,98 @@
+Project "Dark_Kitchen_Plus" {
+  database_type: 'MySQL'
+  note: 'ER-модель для Dark Kitchen + Recipe Builder'
+}
+
+// 1. СЛОВНИКИ ТА ОСНОВНІ СУТНОСТІ
+Table Diets {
+  diet_id VARCHAR(50) [pk, note: 'vegan, student, fast, chef, dessert']
+  name_ukr VARCHAR(50)
+}
+
+Table Ingredients {
+  ingredient_id VARCHAR(100) [pk, note: 'Назва UA в нижньому регістрі']
+  name_ua VARCHAR(100) [unique]
+  name_en VARCHAR(100)
+}
+
+Table Recipes {
+  recipe_id VARCHAR(10) [pk]
+  title_ua VARCHAR(255)
+  title_en VARCHAR(255)
+  category VARCHAR [note: 'ENUM: breakfast, lunch, dinner, dessert, snack']
+  time_minutes INT
+  difficulty VARCHAR [note: 'ENUM: Easy, Medium, Hard, Unk']
+  calories INT
+  protein_g INT
+  image_url VARCHAR(255)
+}
+
+
+// 2. ДАНІ КОРИСТУВАЧІВ
+Table Users {
+  user_id INT [pk, increment]
+  username VARCHAR(100) [unique]
+  email VARCHAR(255) [unique]
+  password_hash VARCHAR(255)
+  preferred_cooker VARCHAR [note: 'ENUM: pan, pot, multi, kazan, micro, none']
+}
+
+
+// 3. ТАБЛИЦІ ЗВ'ЯЗКІВ (M:N)
+
+// Зв'язок Рецепти <-> Дієти (Теги)
+Table RecipeDiets {
+  recipe_id VARCHAR(10) [ref: > Recipes.recipe_id]
+  diet_id VARCHAR(50) [ref: > Diets.diet_id]
+  
+  indexes {
+    (recipe_id, diet_id) [pk]
+  }
+}
+
+// Зв'язок Рецепти <-> Інгредієнти
+Table RecipeIngredients {
+  recipe_id VARCHAR(10) [ref: > Recipes.recipe_id]
+  ingredient_id VARCHAR(100) [ref: > Ingredients.ingredient_id]
+  
+  indexes {
+    (recipe_id, ingredient_id) [pk]
+  }
+}
+
+// Зв'язок Користувачі <-> Улюблені Рецепти
+Table Favorites {
+  user_id INT [ref: > Users.user_id]
+  recipe_id VARCHAR(10) [ref: > Recipes.recipe_id]
+  
+  indexes {
+    (user_id, recipe_id) [pk]
+  }
+}
+
+
+// 4. ТАБЛИЦІ ДЛЯ 1:N
+
+// Покрокова інструкція
+Table Steps {
+  step_id INT [pk, increment]
+  recipe_id VARCHAR(10) [ref: > Recipes.recipe_id]
+  step_number INT
+  description TEXT
+}
+
+// Список покупок
+Table ShoppingList {
+  item_id INT [pk, increment]
+  user_id INT [ref: > Users.user_id]
+  ingredient_name VARCHAR(100)
+  is_bought BOOLEAN [default: false]
+}
+
+// Історія введених інгредієнтів
+Table IngredientHistory {
+  history_id INT [pk, increment]
+  user_id INT [ref: > Users.user_id]
+  ingredient_name VARCHAR(100)
+  added_at TIMESTAMP [default: 'CURRENT_TIMESTAMP']
+}

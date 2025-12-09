@@ -1,0 +1,1222 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0" />
+<title>Dark Kitchen: Ultimate Edition</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+  /* =========================================
+     1. CSS VARIABLES & THEMES
+     ========================================= */
+  :root {
+    /* DARK THEME (Default) */
+    --bg-body: #09090b;
+    --bg-card: #18181b;
+    --bg-sidebar: rgba(20, 20, 23, 0.6);
+    --border: rgba(255, 255, 255, 0.08);
+    --primary: #f59e0b; /* Amber Orange */
+    --primary-hover: #d97706;
+    --primary-glow: rgba(245, 158, 11, 0.3);
+    --text-main: #fafafa;
+    --text-muted: #a1a1aa;
+    --modal-bg: #121214;
+    --success: #10B981;
+    --danger: #EF4444;
+    
+    --font-heading: 'Space Grotesk', sans-serif;
+    --font-body: 'Manrope', sans-serif;
+    --radius-md: 16px;
+    --radius-lg: 24px;
+    --shadow-card: 0 10px 30px -10px rgba(0,0,0,0.5);
+  }
+
+  /* LIGHT THEME (Activated by class) */
+  body.light-mode {
+    --bg-body: #f3f4f6;
+    --bg-card: #ffffff;
+    --bg-sidebar: rgba(255, 255, 255, 0.8);
+    --border: #e5e7eb;
+    --primary: #ea580c; /* Darker Orange for contrast */
+    --primary-hover: #c2410c;
+    --primary-glow: rgba(234, 88, 12, 0.15);
+    --text-main: #111827;
+    --text-muted: #6b7280;
+    --modal-bg: #ffffff;
+    --shadow-card: 0 10px 30px -10px rgba(0,0,0,0.1);
+  }
+
+  /* =========================================
+     2. GLOBAL STYLES
+     ========================================= */
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
+  
+  body {
+    margin: 0; padding: 0;
+    background-color: var(--bg-body);
+    color: var(--text-main);
+    font-family: var(--font-body);
+    overflow-x: hidden;
+    min-height: 100vh;
+    transition: background-color 0.3s, color 0.3s;
+  }
+
+  h1, h2, h3, h4 { font-family: var(--font-heading); margin: 0; font-weight: 700; letter-spacing: -0.02em; }
+  button { cursor: pointer; font-family: var(--font-body); }
+  ul { list-style: none; padding: 0; margin: 0; }
+
+  /* =========================================
+     3. LAYOUT STRUCTURE
+     ========================================= */
+  .app-shell {
+    display: grid;
+    grid-template-columns: 280px 1fr; /* Sidebar + Main */
+    max-width: 1920px; margin: 0 auto; height: 100vh; overflow: hidden;
+  }
+
+  /* SIDEBAR */
+  aside {
+    padding: 30px 20px;
+    border-right: 1px solid var(--border);
+    display: flex; flex-direction: column; gap: 24px;
+    background: var(--bg-sidebar);
+    backdrop-filter: blur(20px);
+    z-index: 50;
+  }
+
+  .brand {
+    font-size: 26px; font-weight: 800; font-family: var(--font-heading);
+    color: var(--primary); text-shadow: 0 0 20px var(--primary-glow);
+    display: flex; align-items: center; gap: 10px; margin-bottom: 10px;
+  }
+  .brand span { color: var(--text-main); }
+
+  .nav-group { display: flex; flex-direction: column; gap: 8px; }
+  .nav-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 5px; font-weight: 700; }
+  
+  .nav-item {
+    padding: 12px 16px; border-radius: 12px;
+    color: var(--text-muted); cursor: pointer;
+    font-weight: 600; display: flex; align-items: center; gap: 12px;
+    transition: all 0.2s; border: 1px solid transparent;
+  }
+  .nav-item:hover { background: rgba(125,125,125,0.08); color: var(--text-main); }
+  .nav-item.active { 
+    background: linear-gradient(90deg, rgba(245,158,11,0.1), transparent);
+    color: var(--primary); border-left: 3px solid var(--primary); border-color: rgba(245,158,11,0.1);
+  }
+
+  /* SHOPPING LIST WIDGET */
+  .fridge-widget {
+    margin-top: auto;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 20px;
+    box-shadow: var(--shadow-card);
+  }
+  .shopping-list { font-size: 13px; max-height: 200px; overflow-y: auto; padding-right: 5px; margin-top: 10px; }
+  .shopping-list::-webkit-scrollbar { width: 4px; }
+  .shopping-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+  
+  .shop-item { 
+    padding: 8px 0; border-bottom: 1px dashed var(--border); 
+    display: flex; justify-content: space-between; align-items: center; animation: fadeIn 0.3s; 
+  }
+
+  /* MAIN CONTENT */
+  main { position: relative; overflow-y: auto; padding: 0 40px 100px 40px; }
+  main::-webkit-scrollbar { width: 8px; }
+  main::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+  /* HEADER */
+  header {
+    position: sticky; top: 0; z-index: 40;
+    padding: 20px 0;
+    background: var(--bg-body);
+    opacity: 0.98;
+    display: flex; justify-content: space-between; align-items: center;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 30px;
+  }
+
+  .ctrl-group { display: flex; gap: 12px; align-items: center; }
+  .ctrl-btn {
+    width: 44px; height: 44px; border-radius: 50%;
+    border: 1px solid var(--border); background: var(--bg-card);
+    color: var(--text-main); display: grid; place-items: center;
+    font-size: 18px; transition: 0.2s;
+  }
+  .ctrl-btn:hover { background: var(--border); transform: scale(1.05); }
+
+  /* HERO SEARCH SECTION */
+  .hero-search {
+    background: linear-gradient(135deg, var(--bg-card) 0%, rgba(245,158,11,0.05) 100%);
+    border: 1px solid var(--border); border-radius: var(--radius-lg);
+    padding: 40px; text-align: center; position: relative; margin-bottom: 40px;
+    box-shadow: var(--shadow-card);
+  }
+
+  .search-container {
+    display: flex; gap: 12px; max-width: 800px; margin: 25px auto; flex-wrap: wrap;
+  }
+  .big-input {
+    flex: 1; padding: 18px 24px; min-width: 250px;
+    background: var(--bg-body); border: 2px solid var(--border);
+    border-radius: var(--radius-md); color: var(--text-main);
+    font-size: 16px; font-family: var(--font-body); transition: 0.3s;
+  }
+  .big-input:focus { border-color: var(--primary); box-shadow: 0 0 0 4px var(--primary-glow); }
+  
+  .btn-primary {
+    background: var(--primary); color: #000; font-weight: 700;
+    border: none; padding: 0 32px; border-radius: var(--radius-md);
+    cursor: pointer; transition: 0.3s; font-size: 16px; display: flex; align-items: center; gap: 8px;
+  }
+  .btn-primary:hover { background: var(--primary-hover); transform: translateY(-2px); }
+
+  /* CHIPS & FILTERS */
+  .chips-area { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; min-height: 24px; margin-top: 15px; }
+  .chip {
+    background: var(--bg-body); padding: 8px 16px; border-radius: 50px;
+    font-size: 14px; display: flex; align-items: center; gap: 8px; border: 1px solid var(--border);
+    animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+  .chip button { background: none; border: none; color: var(--text-muted); font-size: 16px; padding: 0; }
+  .chip button:hover { color: var(--danger); }
+
+  .filters-wrapper { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 20px; flex-wrap: wrap; gap: 20px; }
+  .categories-scroll { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: none; }
+  
+  .cat-pill {
+    padding: 10px 20px; border-radius: 50px; border: 1px solid var(--border);
+    background: var(--bg-card); color: var(--text-muted); cursor: pointer;
+    white-space: nowrap; font-weight: 600; font-size: 14px; transition: 0.2s;
+  }
+  .cat-pill:hover { border-color: var(--primary); color: var(--text-main); }
+  .cat-pill.active { background: var(--primary); color: #000; border-color: var(--primary); box-shadow: 0 4px 15px var(--primary-glow); }
+
+  .diet-filters { display: flex; gap: 15px; background: var(--bg-card); padding: 10px 20px; border-radius: 50px; border: 1px solid var(--border); }
+  .diet-check { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; cursor: pointer; color: var(--text-muted); }
+  .diet-check input { accent-color: var(--primary); width: 16px; height: 16px; }
+
+  /* GRID SYSTEM */
+  .grid-recipes {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 30px; padding-bottom: 50px;
+  }
+
+  .card {
+    background: var(--bg-card); border-radius: var(--radius-lg); overflow: hidden;
+    border: 1px solid var(--border); position: relative;
+    transition: all 0.4s ease; cursor: pointer; display: flex; flex-direction: column;
+    height: 100%;
+  }
+  .card:hover { transform: translateY(-8px); box-shadow: 0 20px 40px rgba(0,0,0,0.3); border-color: var(--primary); }
+
+  .card-img-box { position: relative; height: 200px; overflow: hidden; background: #222; }
+  .card-img { width: 100%; height: 100%; object-fit: cover; transition: 0.5s; }
+  .card:hover .card-img { transform: scale(1.1); }
+  
+  .card-badges { position: absolute; top: 12px; right: 12px; display: flex; gap: 8px; flex-direction: column; align-items: flex-end; }
+  .badge { padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 800; backdrop-filter: blur(8px); color: white; text-transform: uppercase; letter-spacing: 0.5px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+  .badge.match { background: var(--success); }
+  .badge.missing { background: var(--danger); }
+  .badge.cat { background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.2); }
+
+  .fav-toggle {
+    position: absolute; top: 12px; left: 12px;
+    width: 36px; height: 36px; border-radius: 50%;
+    background: rgba(0,0,0,0.4); backdrop-filter: blur(4px); border: none;
+    color: white; font-size: 18px; display: grid; place-items: center; transition: 0.2s; z-index: 2;
+  }
+  .fav-toggle:hover { transform: scale(1.1); background: rgba(0,0,0,0.7); }
+  .fav-toggle.active { background: white; color: var(--danger); }
+
+  .card-body { padding: 20px; flex: 1; display: flex; flex-direction: column; }
+  .card-title { font-size: 20px; margin-bottom: 8px; line-height: 1.3; }
+  .card-meta { margin-top: auto; display: flex; justify-content: space-between; padding-top: 15px; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 13px; font-weight: 500; }
+
+  /* FLOATING BUTTON (ADD RECIPE) */
+  .fab {
+    position: fixed; bottom: 40px; right: 40px;
+    width: 64px; height: 64px; border-radius: 50%;
+    background: var(--primary); color: #000;
+    font-size: 32px; border: none; cursor: pointer;
+    box-shadow: var(--primary-glow) 0 10px 30px;
+    display: grid; place-items: center; z-index: 100;
+    transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+  .fab:hover { transform: scale(1.1) rotate(90deg); }
+
+  /* =========================================
+     4. MODALS
+     ========================================= */
+  .modal-overlay {
+    position: fixed; inset: 0; z-index: 1000;
+    background: rgba(0,0,0,0.85); backdrop-filter: blur(8px);
+    display: none; align-items: center; justify-content: center;
+    opacity: 0; transition: opacity 0.3s ease;
+  }
+  .modal-overlay.active { display: flex; opacity: 1; }
+
+  .modal-content {
+    background: var(--modal-bg); width: 95%; max-width: 650px;
+    border-radius: var(--radius-lg); border: 1px solid var(--border);
+    padding: 0; position: relative; max-height: 90vh; overflow-y: auto;
+    transform: translateY(30px); transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 50px 100px -20px rgba(0,0,0,0.8);
+  }
+  .modal-overlay.active .modal-content { transform: translateY(0); }
+
+  .modal-header { padding: 25px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+  .modal-body { padding: 30px; }
+  
+  .close-btn {
+    width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--border);
+    background: var(--bg-body); color: var(--text-muted); cursor: pointer;
+    display: grid; place-items: center; font-size: 20px; transition: 0.2s;
+  }
+  .close-btn:hover { background: var(--danger); color: white; border-color: var(--danger); }
+
+  /* FORM STYLES */
+  .form-group { margin-bottom: 20px; }
+  .form-label { display: block; margin-bottom: 8px; font-size: 13px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; }
+  .form-control { 
+    width: 100%; padding: 14px; background: var(--bg-body); 
+    border: 1px solid var(--border); border-radius: 12px; color: var(--text-main); font-family: var(--font-body);
+  }
+  .form-control:focus { border-color: var(--primary); }
+  .btn-full { width: 100%; padding: 16px; font-size: 16px; border-radius: 12px; background: var(--primary); color: black; border: none; font-weight: 700; cursor: pointer; }
+
+  /* RECIPE DETAIL SPECIFIC */
+  .detail-hero { width: 100%; height: 300px; object-fit: cover; }
+  .ing-list-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; margin-top: 10px; }
+  .ing-item { 
+    background: var(--bg-body); padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border);
+    font-size: 13px; display: flex; justify-content: space-between; align-items: center;
+  }
+  .ing-add-btn { color: var(--primary); cursor: pointer; font-weight: 800; font-size: 16px; }
+
+  /* RESPONSIVE */
+  @media (max-width: 900px) {
+    .app-shell { grid-template-columns: 1fr; display: block; }
+    aside { display: none; }
+    main { padding: 16px 16px 100px 16px; }
+    .hero-search { padding: 25px 15px; }
+    .search-container { flex-direction: column; }
+    .filters-wrapper { flex-direction: column; align-items: flex-start; gap: 15px; }
+    .diet-filters { width: 100%; justify-content: space-around; }
+    .fab { bottom: 20px; right: 20px; width: 56px; height: 56px; }
+  }
+  
+  /* ANIMATIONS */
+  @keyframes popIn { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+</style>
+</head>
+<body>
+
+<div class="app-shell">
+  
+  <aside>
+    <div class="brand">
+       <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-5.5-2.5l7.51-3.22-7.52-1.5 1.5-7.52 7.52 1.5-1.5 7.51z"/></svg>
+       <span>Dark</span>Kitchen
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-label" data-i18n="nav_menu">Меню</div>
+      <div class="nav-item active" onclick="setFilter('all', this)" data-i18n="menu_all">🍽️ Всі рецепти</div>
+      <div class="nav-item" onclick="setFilter('fav', this)" data-i18n="menu_fav">❤️ Улюблене</div>
+      <div class="nav-item" onclick="setFilter('student', this)" data-i18n="menu_student">🎓 Студентське</div>
+      <div class="nav-item" onclick="setFilter('my', this)" data-i18n="menu_my">👤 Мої рецепти</div>
+    </div>
+    
+    <div class="nav-group">
+      <div class="nav-label" data-i18n="nav_cat">Категорії</div>
+      <div class="nav-item" onclick="setFilter('breakfast', this)" data-i18n="cat_break">🍳 Сніданок</div>
+      <div class="nav-item" onclick="setFilter('lunch', this)" data-i18n="cat_lunch">🍝 Обід</div>
+      <div class="nav-item" onclick="setFilter('dinner', this)" data-i18n="cat_dinner">🌙 Вечеря</div>
+      <div class="nav-item" onclick="setFilter('dessert', this)" data-i18n="cat_dessert">🍩 Десерт</div>
+    </div>
+
+    <div class="fridge-widget">
+      <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); padding-bottom:8px">
+        <strong style="font-size:12px; text-transform:uppercase" data-i18n="shop_title">Список покупок</strong>
+        <span id="shop-count" style="background:var(--primary); color:black; padding:2px 6px; border-radius:10px; font-size:10px; font-weight:800">0</span>
+      </div>
+      <ul class="shopping-list" id="shopping-list-ui"></ul>
+      <button onclick="clearShop()" style="width:100%; margin-top:10px; background:transparent; border:1px solid var(--border); color:var(--text-muted); padding:6px; border-radius:8px; font-size:11px" data-i18n="shop_clear">Очистити список</button>
+    </div>
+  </aside>
+
+  <main>
+    <header>
+      <div>
+        <h2 id="greeting">Вітаю! 👋</h2>
+        <div style="font-size:12px; color:var(--text-muted)" id="status-line" data-i18n="status_line">
+          Status: Online • DB: 120+ Recipes
+        </div>
+      </div>
+      <div class="ctrl-group">
+         <button class="ctrl-btn" onclick="toggleTheme()" title="Switch Theme">🌗</button>
+         <button class="ctrl-btn" onclick="toggleLang()" style="font-size:11px; font-weight:800; width:44px">UA</button>
+         <button class="ctrl-btn" onclick="openModal('auth-modal')" title="Profile">
+             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+         </button>
+      </div>
+    </header>
+
+    <div class="hero-search">
+      <h1 style="font-size:32px; margin-bottom:10px" data-i18n="hero_title">Що в холодильнику?</h1>
+      <p style="color:var(--text-muted)" data-i18n="hero_sub">Вкажи інгредієнти або знайди страву за назвою</p>
+      
+      <div class="search-container">
+        <input type="text" class="big-input" id="ing-input" placeholder="Є: яйця, сир, томати..." data-i18n-ph="ph_ing">
+        <input type="text" class="big-input" id="name-input" placeholder="Шукати: Борщ..." data-i18n-ph="ph_name" oninput="liveSearch()">
+        <button class="btn-primary" onclick="addIngredient()" data-i18n="btn_add">
+           <span>+</span> <span data-i18n="btn_add_text">Додати</span>
+        </button>
+      </div>
+      <div class="chips-area" id="chips-area"></div>
+    </div>
+
+    <div class="filters-wrapper">
+       <div style="flex:1; overflow:hidden">
+         <h4 style="margin-bottom:10px" data-i18n="filter_quick">Швидкі фільтри</h4>
+         <div class="categories-scroll">
+            <div class="cat-pill active" onclick="setCat('all', this)" data-i18n="cat_all">Всі</div>
+            <div class="cat-pill" onclick="setCat('fast', this)" data-i18n="cat_fast">⚡ Швидко (15хв)</div>
+            <div class="cat-pill" onclick="setCat('chef', this)" data-i18n="cat_chef">👨‍🍳 Шеф-кухар</div>
+            <div class="cat-pill" onclick="setCat('healthy', this)" data-i18n="cat_healthy">🌿 ЗОЖ</div>
+         </div>
+       </div>
+       
+       <div>
+         <h4 style="margin-bottom:10px" data-i18n="filter_diet">Дієта</h4>
+         <div class="diet-filters">
+            <label class="diet-check"><input type="checkbox" onchange="toggleDiet('vegan')"> Vegan</label>
+            <label class="diet-check"><input type="checkbox" onchange="toggleDiet('glutenfree')"> No Gluten</label>
+         </div>
+       </div>
+    </div>
+
+    <div class="grid-recipes" id="grid"></div>
+
+    <button class="fab" onclick="openModal('add-modal')" title="Add Recipe">+</button>
+  </main>
+</div>
+
+<!-- RECIPE DETAIL MODAL -->
+<div class="modal-overlay" id="recipe-modal">
+  <div class="modal-content">
+    <div style="position:relative">
+        <img src="" id="detail-img" class="detail-hero">
+        <button class="close-btn" style="position:absolute; top:20px; right:20px; background:rgba(0,0,0,0.5); border:none; color:white" onclick="closeModal('recipe-modal')">×</button>
+        <div style="position:absolute; bottom:0; left:0; right:0; background:linear-gradient(to top, var(--modal-bg), transparent); padding:20px; padding-top:60px">
+             <h1 id="detail-title" style="font-size:28px; text-shadow:0 2px 10px rgba(0,0,0,0.8)">Title</h1>
+        </div>
+    </div>
+    
+    <div class="modal-body">
+      <div style="display:flex; gap:15px; margin-bottom:25px; font-size:14px; color:var(--text-muted); border-bottom:1px solid var(--border); padding-bottom:15px">
+         <span id="detail-time">⏱ 15 хв</span>
+         <span id="detail-cat">📂 Dinner</span>
+         <span id="detail-cal">🔥 400 kcal</span>
+      </div>
+      
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:30px">
+         <div>
+            <h4 data-i18n="lbl_ings">Інгредієнти</h4>
+            <div id="detail-ings" class="ing-list-grid"></div>
+         </div>
+         <div>
+            <h4 data-i18n="lbl_steps">Інструкція</h4>
+            <div id="detail-steps" style="margin-top:10px; line-height:1.6; color:var(--text-main); font-size:14px"></div>
+         </div>
+      </div>
+
+      <button class="btn-full" style="margin-top:30px" onclick="closeModal('recipe-modal')" data-i18n="btn_cooked">Готово! (Я це з'їв)</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD RECIPE MODAL -->
+<div class="modal-overlay" id="add-modal">
+  <div class="modal-content" style="max-width:500px">
+    <div class="modal-header">
+      <h3 data-i18n="add_title">Новий рецепт</h3>
+      <button class="close-btn" onclick="closeModal('add-modal')">×</button>
+    </div>
+    <div class="modal-body">
+      <form id="add-form">
+        <div class="form-group">
+           <label class="form-label" data-i18n="lbl_name">Назва страви</label>
+           <input type="text" class="form-control" name="title" required data-i18n-ph="ph_title" placeholder="Назва страви">
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px">
+            <div class="form-group">
+               <label class="form-label" data-i18n="lbl_time">Час (хв)</label>
+               <input type="number" class="form-control" name="time" required>
+            </div>
+            <div class="form-group">
+               <label class="form-label" data-i18n="lbl_cat">Категорія</label>
+               <select class="form-control" name="category">
+                   <option value="breakfast" data-i18n="cat_break_opt">Сніданок</option>
+                   <option value="lunch" data-i18n="cat_lunch_opt">Обід</option>
+                   <option value="dinner" data-i18n="cat_dinner_opt">Вечеря</option>
+                   <option value="dessert" data-i18n="cat_dessert_opt">Десерт</option>
+                   <option value="student" data-i18n="cat_student_opt">Студентське</option>
+               </select>
+            </div>
+        </div>
+        <div class="form-group">
+           <label class="form-label" data-i18n="lbl_ings_list">Інгредієнти (через кому)</label>
+           <input type="text" class="form-control" name="ings" placeholder="Яйця, молоко, цукор..." required data-i18n-ph="ph_ings_list">
+        </div>
+        <div class="form-group">
+           <label class="form-label" data-i18n="lbl_instr">Кроки приготування</label>
+           <textarea class="form-control" name="steps" rows="4" required data-i18n-ph="ph_steps" placeholder="Опишіть кроки приготування..."></textarea>
+        </div>
+        <button type="submit" class="btn-full" data-i18n="btn_save">Зберегти рецепт</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- LOGIN MODAL -->
+<div class="modal-overlay" id="auth-modal">
+  <div class="modal-content" style="max-width:400px; text-align:center">
+    <div class="modal-header">
+       <h3 data-i18n="auth_title">Вхід</h3>
+       <button class="close-btn" onclick="closeModal('auth-modal')">×</button>
+    </div>
+    <div class="modal-body">
+       <div style="font-size:40px; margin-bottom:10px">👤</div>
+
+       <form id="login-form">
+           <div class="form-group">
+              <input type="email" class="form-control" name="email" placeholder="Email" required data-i18n-ph="ph_email">
+           </div>
+           <div class="form-group">
+              <input type="password" class="form-control" name="password" placeholder="Пароль" required data-i18n-ph="ph_password">
+           </div>
+           <button type="submit" class="btn-full" data-i18n="btn_login">Увійти</button>
+       </form>
+
+       <div style="margin-top:15px; font-size:12px; color:var(--text-muted)">
+          <span data-i18n="auth_no_acc">Немає акаунту?</span>
+          <a href="#" style="color:var(--primary)" onclick="openRegister()" data-i18n="auth_reg_link">Реєстрація</a>
+       </div>
+    </div>
+  </div>
+</div>
+
+<!-- REGISTER MODAL -->
+<div class="modal-overlay" id="register-modal">
+  <div class="modal-content" style="max-width:400px; text-align:center">
+    <div class="modal-header">
+       <h3 data-i18n="reg_title">Реєстрація</h3>
+       <button class="close-btn" onclick="closeModal('register-modal')">×</button>
+    </div>
+    <div class="modal-body">
+       <div style="font-size:40px; margin-bottom:10px">📝</div>
+
+       <form id="register-form">
+           <div class="form-group">
+              <input type="text" class="form-control" name="username" placeholder="Ваш логін" required data-i18n-ph="ph_username">
+           </div>
+           <div class="form-group">
+              <input type="email" class="form-control" name="email" placeholder="Email" required data-i18n-ph="ph_email">
+           </div>
+           <div class="form-group">
+              <input type="password" class="form-control" name="password" placeholder="Пароль" required data-i18n-ph="ph_password">
+           </div>
+           <button type="submit" class="btn-full" data-i18n="reg_btn">Зареєструватися</button>
+       </form>
+
+       <div style="margin-top:15px; font-size:12px; color:var(--text-muted)">
+          <span data-i18n="reg_have_acc">Вже маєте акаунт?</span>
+          <a href="#" style="color:var(--primary)" onclick="switchToLogin()" data-i18n="reg_login_link">Увійти</a>
+       </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* --- 1. BASE DATABASE (Offline) --- */
+const BASE_RECIPES = [
+  {
+    id:'r1',
+    title:{ ua:'Студентська Яєчня', en:'Student Omelette' },
+    cat:'breakfast',
+    tags:['student','fast','cheap'],
+    time:10,
+    ings:['яйця','масло','сіль','хліб'],
+    steps:[
+      'Розігрій пательню з маслом.',
+      'Розбий яйця, посоли.',
+      'Смаж 5 хв. Їж з хлібом.'
+    ],
+    img:'https://images.unsplash.com/photo-1525351484163-7529414395d8?w=600&q=80'
+  },
+  {
+    id:'r2',
+    title:{ ua:'Паста "Кінець місяця"', en:'End-of-Month Pasta' },
+    cat:'lunch',
+    tags:['student','cheap'],
+    time:15,
+    ings:['макарони','кетчуп','сир'],
+    steps:[
+      'Звари макарони (10 хв).',
+      'Злий воду.',
+      'Залий кетчупом і посип сиром.'
+    ],
+    img:'https://images.unsplash.com/photo-1551183053-bf91a1d81141?w=600&q=80'
+  },
+  {
+    id:'r3',
+    title:{ ua:'Курячий Суп', en:'Chicken Soup' },
+    cat:'lunch',
+    tags:['healthy'],
+    time:45,
+    ings:['курка','морква','цибуля','картопля','вода'],
+    steps:[
+      'Звари бульйон з курки.',
+      'Додай нарізані овочі.',
+      'Вари до м\'якості.'
+    ],
+    img:'https://images.unsplash.com/photo-1547592180-85f173990554?w=600&q=80'
+  },
+  {
+    id:'r4',
+    title:{ ua:'Панкейки', en:'Pancakes' },
+    cat:'breakfast',
+    tags:['dessert','chef'],
+    time:25,
+    ings:['мука','молоко','яйця','цукор','масло'],
+    steps:[
+      'Змішай муку, цукор, яйця і молоко.',
+      'Смаж на сухій сковороді по 2 хв з кожного боку.'
+    ],
+    img:'https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=600&q=80'
+  },
+  {
+    id:'r5',
+    title:{ ua:'Грецький Салат', en:'Greek Salad' },
+    cat:'dinner',
+    tags:['healthy','vegan','glutenfree','fast'],
+    time:10,
+    ings:['огірок','помідор','сир фета','оливки','олія'],
+    steps:[
+      'Наріж овочі великими кубиками.',
+      'Додай фету і оливки.',
+      'Заправ олією та спеціями.'
+    ],
+    img:'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=600&q=80'
+  },
+  {
+    id:'r6',
+    title:{ ua:'Домашній Бургер', en:'Homemade Burger' },
+    cat:'dinner',
+    tags:['party','chef'],
+    time:35,
+    ings:['булка','фарш','сир','салат','соус'],
+    steps:[
+      'Сформуй котлету з фаршу, посмаж.',
+      'Підігрій булку.',
+      'Збери: булка, соус, салат, котлета, сир.'
+    ],
+    img:'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=600&q=80'
+  },
+  {
+    id:'r7',
+    title:{ ua:'Вівсянка з ягодами', en:'Oatmeal with Berries' },
+    cat:'breakfast',
+    tags:['healthy','vegan','fast'],
+    time:5,
+    ings:['вівсянка','вода','ягоди','мед'],
+    steps:[
+      'Залий вівсянку окропом.',
+      'Дай настоятися 5 хв.',
+      'Додай ягоди і мед.'
+    ],
+    img:'https://images.unsplash.com/photo-1517673132405-a56a62b18caf?w=600&q=80'
+  },
+  {
+    id:'r8',
+    title:{ ua:'Тірамісу (Ліниве)', en:'Lazy Tiramisu' },
+    cat:'dessert',
+    tags:['dessert','party'],
+    time:20,
+    ings:['печиво','кава','сир маскарпоне','цукор'],
+    steps:[
+      'Завари міцну каву.',
+      'Збий сир з цукром.',
+      'Вмочуй печиво в каву і викладай шарами з кремом.'
+    ],
+    img:'https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?w=600&q=80'
+  },
+  {
+    id:'r9',
+    title:{ ua:'Рис з овочами', en:'Rice with Vegetables' },
+    cat:'lunch',
+    tags:['healthy','vegan','glutenfree'],
+    time:25,
+    ings:['рис','кукурудза','горошок','морква','соєвий соус'],
+    steps:[
+      'Звари рис.',
+      'Обсмаж овочі на сковороді.',
+      'Змішай рис з овочами та соусом.'
+    ],
+    img:'https://images.unsplash.com/photo-1536304993881-ff00fa288d3e?w=600&q=80'
+  }
+];
+
+/* --- 2. TRANSLATIONS --- */
+const LANG = {
+  ua: {
+    nav_menu:'Меню', menu_all:'🍽️ Всі рецепти', menu_fav:'❤️ Улюблене', menu_student:'🎓 Студентське', menu_my:'👤 Мої рецепти',
+    nav_cat:'Категорії', cat_break:'🍳 Сніданок', cat_lunch:'🍝 Обід', cat_dinner:'🌙 Вечеря', cat_dessert:'🍩 Десерт',
+    shop_title:'Список покупок', shop_clear:'Очистити список', hero_title:'Що в холодильнику?', hero_sub:'Вкажи інгредієнти або знайди страву за назвою',
+    ph_ing:'Є: яйця, сир...', ph_name:'Шукати: Борщ...', btn_add_text:'Додати', filter_quick:'Швидкі фільтри', filter_diet:'Дієта',
+    cat_all:'Всі', cat_fast:'⚡ Швидко (15хв)', cat_chef:'👨‍🍳 Шеф-кухар', cat_healthy:'🌿 ЗОЖ',
+    lbl_ings:'Інгредієнти', lbl_steps:'Інструкція',
+    btn_cooked:'Готово! (Я це з\'їв)', add_title:'Новий рецепт', lbl_name:'Назва страви', lbl_time:'Час (хв)', lbl_cat:'Категорія',
+    lbl_ings_list:'Інгредієнти (через кому)', lbl_instr:'Кроки приготування',
+    btn_save:'Зберегти рецепт',
+    auth_title:'Вхід',
+    btn_login:'Увійти',
+    auth_no_acc:'Немає акаунту?',
+    auth_reg_link:'Реєстрація',
+    reg_title:'Реєстрація',
+    reg_btn:'Зареєструватися',
+    reg_have_acc:'Вже маєте акаунт?',
+    reg_login_link:'Увійти',
+    ph_email:'Email',
+    ph_password:'Пароль',
+    ph_username:'Ваш логін',
+    ph_title:'Назва страви',
+    ph_ings_list:'Яйця, молоко, цукор...',
+    ph_steps:'Опишіть кроки приготування...',
+    status_line:'Статус: Онлайн • БД: 120+ рецептів',
+    no_results:'Нічого не знайдено 😔 Спробуйте змінити фільтри.',
+    badge_ready:'Готуємо!',
+    badge_missing_label:'Треба:',
+    unit_min:'хв',
+    cat_break_opt:'Сніданок',
+    cat_lunch_opt:'Обід',
+    cat_dinner_opt:'Вечеря',
+    cat_dessert_opt:'Десерт',
+    cat_student_opt:'Студентське'
+  },
+  en: {
+    nav_menu:'Menu', menu_all:'🍽️ All Recipes', menu_fav:'❤️ Favorites', menu_student:'🎓 Student', menu_my:'👤 My Recipes',
+    nav_cat:'Categories', cat_break:'🍳 Breakfast', cat_lunch:'🍝 Lunch', cat_dinner:'🌙 Dinner', cat_dessert:'🍩 Dessert',
+    shop_title:'Shopping List', shop_clear:'Clear List', hero_title:'What\'s in the fridge?', hero_sub:'Enter ingredients or search by dish name',
+    ph_ing:'Have: eggs, cheese...', ph_name:'Search: Borscht...', btn_add_text:'Add', filter_quick:'Quick Filters', filter_diet:'Dietary',
+    cat_all:'All', cat_fast:'⚡ Fast (15 min)', cat_chef:'👨‍🍳 Chef Mode', cat_healthy:'🌿 Healthy',
+    lbl_ings:'Ingredients', lbl_steps:'Instructions',
+    btn_cooked:'Done! (I ate this)', add_title:'New Recipe', lbl_name:'Dish name', lbl_time:'Time (min)', lbl_cat:'Category',
+    lbl_ings_list:'Ingredients (comma separated)', lbl_instr:'Cooking steps',
+    btn_save:'Save recipe',
+    auth_title:'Login',
+    btn_login:'Login',
+    auth_no_acc:'No account?',
+    auth_reg_link:'Sign up',
+    reg_title:'Sign up',
+    reg_btn:'Sign up',
+    reg_have_acc:'Already have an account?',
+    reg_login_link:'Login',
+    ph_email:'Email',
+    ph_password:'Password',
+    ph_username:'Your username',
+    ph_title:'Dish name',
+    ph_ings_list:'Eggs, milk, sugar...',
+    ph_steps:'Describe the cooking steps...',
+    status_line:'Status: Online • DB: 120+ Recipes',
+    no_results:'Nothing found 😔 Try changing filters.',
+    badge_ready:'Ready to cook!',
+    badge_missing_label:'Missing:',
+    unit_min:'min',
+    cat_break_opt:'Breakfast',
+    cat_lunch_opt:'Lunch',
+    cat_dinner_opt:'Dinner',
+    cat_dessert_opt:'Dessert',
+    cat_student_opt:'Student'
+  }
+};
+
+/* Small helper to get translation by key */
+function t(key) {
+  const dict = LANG[state.lang] || {};
+  return dict[key] || key;
+}
+
+/* --- ING & STEP DICTIONARY --- */
+const ING_TRANSLATE = {
+  // INGREDIENTS
+  'яйця': { en: 'eggs' },
+  'масло': { en: 'butter' },
+  'сіль': { en: 'salt' },
+  'хліб': { en: 'bread' },
+  'макарони': { en: 'pasta' },
+  'кетчуп': { en: 'ketchup' },
+  'сир': { en: 'cheese' },
+  'курка': { en: 'chicken' },
+  'морква': { en: 'carrot' },
+  'цибуля': { en: 'onion' },
+  'картопля': { en: 'potato' },
+  'вода': { en: 'water' },
+  'мука': { en: 'flour' },
+  'молоко': { en: 'milk' },
+  'цукор': { en: 'sugar' },
+  'огірок': { en: 'cucumber' },
+  'помідор': { en: 'tomato' },
+  'сир фета': { en: 'feta cheese' },
+  'оливки': { en: 'olives' },
+  'олія': { en: 'oil' },
+  'булка': { en: 'bun' },
+  'фарш': { en: 'minced meat' },
+  'салат': { en: 'lettuce' },
+  'соус': { en: 'sauce' },
+  'вівсянка': { en: 'oatmeal' },
+  'ягоди': { en: 'berries' },
+  'мед': { en: 'honey' },
+  'печиво': { en: 'cookies' },
+  'кава': { en: 'coffee' },
+  'сир маскарпоне': { en: 'mascarpone cheese' },
+};
+
+function translateIng(word) {
+  if (state.lang === 'ua') return word;
+  return ING_TRANSLATE[word]?.en || word;
+}
+
+function translateStep(sentence) {
+  if (state.lang === 'ua') return sentence;
+
+  let translated = sentence;
+
+  Object.keys(ING_TRANSLATE).forEach(uaWord => {
+    const enWord = ING_TRANSLATE[uaWord].en;
+    const regex = new RegExp(uaWord, 'gi');
+    translated = translated.replace(regex, enWord);
+  });
+
+  // optional small fixes
+  translated = translated.replace('хв', 'min');
+
+  return translated;
+}
+
+/* --- 3. STATE MANAGEMENT --- */
+let state = {
+    myIngs: new Set(),
+    shopping: new Set(JSON.parse(localStorage.getItem('dk_shop') || '[]')),
+    favorites: new Set(JSON.parse(localStorage.getItem('dk_favs') || '[]')),
+    userRecipes: JSON.parse(localStorage.getItem('dk_user_recipes') || '[]'),
+    theme: localStorage.getItem('dk_theme') || 'dark',
+    lang: localStorage.getItem('dk_lang') || 'ua',
+    user: localStorage.getItem('dk_user') || null,
+    filters: { cat:'all', diet:[], searchName:'' }
+};
+
+/* --- 4. INIT --- */
+document.addEventListener('DOMContentLoaded', () => {
+    applyTheme();
+    applyLang();
+    renderShop();
+    renderGrid();
+    updateGreeting();
+
+    // Enter key listeners
+    document.getElementById('ing-input').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') addIngredient();
+    });
+
+    // Init Flask auth handlers
+    initAuthHandlers();
+});
+
+/* --- 5. UTILS FOR TITLES / TEXT --- */
+
+function getTitle(recipe) {
+    if (!recipe) return '';
+    if (typeof recipe.title === 'string') return recipe.title;
+    if (recipe.title && recipe.title[state.lang]) return recipe.title[state.lang];
+    if (recipe.title && recipe.title.ua) return recipe.title.ua;
+    return '';
+}
+
+function translateCategory(cat) {
+    const mapUA = {
+        breakfast:'Сніданок',
+        lunch:'Обід',
+        dinner:'Вечеря',
+        dessert:'Десерт',
+        student:'Студентське'
+    };
+    const mapEN = {
+        breakfast:'Breakfast',
+        lunch:'Lunch',
+        dinner:'Dinner',
+        dessert:'Dessert',
+        student:'Student'
+    };
+    return state.lang === 'ua' ? (mapUA[cat] || cat) : (mapEN[cat] || cat);
+}
+
+function getMinutesLabel() {
+    return t('unit_min');
+}
+
+function updateGreeting() {
+    const el = document.getElementById('greeting');
+    if (!el) return;
+    const base = state.lang === 'ua' ? 'Вітаю' : 'Welcome';
+    if (state.user) el.innerText = `${base}, ${state.user}! 👋`;
+    else el.innerText = base + '! 👋';
+}
+
+/* --- 6. CORE FUNCTIONS --- */
+
+function openRegister() {
+    document.getElementById('auth-modal')?.classList.remove('active');
+    document.getElementById('register-modal')?.classList.add('active');
+}
+
+function switchToLogin() {
+    document.getElementById('register-modal')?.classList.remove('active');
+    document.getElementById('auth-modal')?.classList.add('active');
+}
+
+// Theme & Lang
+function toggleTheme() {
+    state.theme = state.theme === 'dark' ? 'light' : 'dark';
+    localStorage.setItem('dk_theme', state.theme);
+    applyTheme();
+}
+function applyTheme() {
+    if(state.theme === 'light') document.body.classList.add('light-mode');
+    else document.body.classList.remove('light-mode');
+}
+
+function toggleLang() {
+    state.lang = state.lang === 'ua' ? 'en' : 'ua';
+    localStorage.setItem('dk_lang', state.lang);
+    applyLang();
+    renderGrid();
+    updateGreeting();
+}
+function applyLang() {
+    const dict = LANG[state.lang];
+    if (!dict) return;
+
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.dataset.i18n;
+        if (dict[key]) el.innerText = dict[key];
+    });
+    document.querySelectorAll('[data-i18n-ph]').forEach(el => {
+        const key = el.dataset.i18nPh;
+        if (dict[key]) el.placeholder = dict[key];
+    });
+
+    const langBtn = document.querySelector('button[onclick="toggleLang()"]');
+    if (langBtn) langBtn.innerText = state.lang.toUpperCase();
+}
+
+// Ingredients
+function addIngredient() {
+    const inp = document.getElementById('ing-input');
+    const val = inp.value.trim().toLowerCase();
+    if(!val) return;
+    val.split(',').forEach(s => {
+        const v = s.trim();
+        if (v) state.myIngs.add(v);
+    });
+    inp.value = '';
+    renderChips();
+    renderGrid();
+}
+function removeIng(txt) {
+    state.myIngs.delete(txt);
+    renderChips();
+    renderGrid();
+}
+function renderChips() {
+    const area = document.getElementById('chips-area');
+    area.innerHTML = '';
+    state.myIngs.forEach(i => {
+        area.innerHTML += `<div class="chip"><span>${i}</span><button onclick="removeIng('${i}')">×</button></div>`;
+    });
+}
+
+// Search & Filter
+function liveSearch() {
+    state.filters.searchName = document.getElementById('name-input').value.toLowerCase();
+    renderGrid();
+}
+
+function setFilter(val, el) {
+    document.querySelectorAll('aside .nav-item').forEach(n => n.classList.remove('active'));
+    el.classList.add('active');
+    
+    if(val === 'fav') state.filters.cat = 'fav';
+    else if(val === 'my') state.filters.cat = 'my';
+    else if(['student','breakfast','lunch','dinner','dessert'].includes(val)) state.filters.cat = val;
+    else state.filters.cat = 'all';
+    
+    document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('active'));
+    renderGrid();
+}
+
+function setCat(val, el) {
+    document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('active'));
+    el.classList.add('active');
+    state.filters.cat = val;
+    renderGrid();
+}
+
+function toggleDiet(type) {
+    if(state.filters.diet.includes(type)) state.filters.diet = state.filters.diet.filter(d=>d!==type);
+    else state.filters.diet.push(type);
+    renderGrid();
+}
+
+// Data helpers
+function getAllRecipes() {
+    return [...BASE_RECIPES, ...state.userRecipes];
+}
+
+// GRID RENDER
+function renderGrid() {
+    const grid = document.getElementById('grid');
+    grid.innerHTML = '';
+    
+    let recipes = getAllRecipes().map(r => {
+        const have = r.ings.filter(i => state.myIngs.has(i));
+        const missing = r.ings.filter(i => !state.myIngs.has(i));
+        const score = r.ings.length ? (have.length / r.ings.length) : 0;
+        return { ...r, have, missing, score };
+    });
+
+    // Name filter
+    if(state.filters.searchName) {
+        recipes = recipes.filter(r => getTitle(r).toLowerCase().includes(state.filters.searchName));
+    }
+    
+    // Category filter
+    const cat = state.filters.cat;
+    if(cat !== 'all') {
+        if(cat === 'fav') recipes = recipes.filter(r => state.favorites.has(r.id));
+        else if(cat === 'my') recipes = recipes.filter(r => String(r.id).startsWith('u'));
+        else if(cat === 'fast') recipes = recipes.filter(r => r.time <= 15);
+        else if(cat === 'healthy') recipes = recipes.filter(r => r.tags.includes('healthy'));
+        else if(cat === 'chef') recipes = recipes.filter(r => r.tags.includes('chef'));
+        else recipes = recipes.filter(r => r.cat === cat || r.tags.includes(cat));
+    }
+    
+    // Diet filter
+    if(state.filters.diet.length) {
+        recipes = recipes.filter(r => state.filters.diet.every(d => r.tags.includes(d)));
+    }
+
+    // Sort
+    recipes.sort((a,b) => {
+        const aFav = state.favorites.has(a.id) ? 1 : 0;
+        const bFav = state.favorites.has(b.id) ? 1 : 0;
+        if(cat !== 'fav' && aFav !== bFav) return bFav - aFav;
+        return b.score - a.score;
+    });
+
+    if(recipes.length === 0) {
+        grid.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:40px; color:var(--text-muted)">${t('no_results')}</div>`;
+        return;
+    }
+
+    recipes.forEach(r => {
+        const isFav = state.favorites.has(r.id);
+        const percent = Math.round(r.score * 100);
+        
+        let badgesHtml = '';
+        if(r.missing.length === 0)
+            badgesHtml += `<span class="badge match">${t('badge_ready')}</span>`;
+        else
+            badgesHtml += `<span class="badge missing">${t('badge_missing_label')} ${r.missing.length}</span>`;
+        badgesHtml += `<span class="badge cat">${translateCategory(r.cat)}</span>`;
+        
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.onclick = (e) => { if(!e.target.closest('.fav-toggle')) openRecipeModal(r); };
+        
+        card.innerHTML = `
+           <div class="card-img-box">
+               <img src="${r.img}" class="card-img" loading="lazy">
+               <div class="card-badges">${badgesHtml}</div>
+               <button class="fav-toggle ${isFav?'active':''}" onclick="toggleFav('${r.id}', this)">♥</button>
+           </div>
+           <div class="card-body">
+               <div class="card-title">${getTitle(r)}</div>
+               <div class="card-meta">
+                   <span>⏱ ${r.time} ${getMinutesLabel()}</span>
+                   <span>${percent}% Match</span>
+               </div>
+           </div>
+        `;
+        grid.appendChild(card);
+    });
+}
+
+// Favorites
+function toggleFav(id, btn) {
+    if(state.favorites.has(id)) {
+        state.favorites.delete(id);
+        btn.classList.remove('active');
+    } else {
+        state.favorites.add(id);
+        btn.classList.add('active');
+    }
+    localStorage.setItem('dk_favs', JSON.stringify([...state.favorites]));
+    if(state.filters.cat === 'fav') renderGrid();
+}
+
+// Shopping list
+function addToShop(item) {
+    state.shopping.add(item);
+    saveShop();
+    renderShop();
+}
+function clearShop() {
+    state.shopping.clear();
+    saveShop();
+    renderShop();
+}
+function saveShop() { localStorage.setItem('dk_shop', JSON.stringify([...state.shopping])); }
+function renderShop() {
+    const ul = document.getElementById('shopping-list-ui');
+    document.getElementById('shop-count').innerText = state.shopping.size;
+    ul.innerHTML = '';
+    state.shopping.forEach(i => {
+        ul.innerHTML += `<li class="shop-item">
+            <span>${i}</span>
+            <span style="cursor:pointer; color:var(--danger); font-weight:bold; padding:0 5px" onclick="state.shopping.delete('${i}'); saveShop(); renderShop()">×</span>
+        </li>`;
+    });
+}
+
+// Modals
+function openModal(id) { document.getElementById(id)?.classList.add('active'); }
+function closeModal(id) { document.getElementById(id)?.classList.remove('active'); }
+
+// Recipe Detail Logic
+function openRecipeModal(r) {
+    document.getElementById('detail-img').src = r.img;
+    document.getElementById('detail-title').innerText = getTitle(r);
+
+    const timeLabel = getMinutesLabel();
+    document.getElementById('detail-time').innerText = `⏱ ${r.time} ${timeLabel}`;
+    document.getElementById('detail-cat').innerText = `📂 ${translateCategory(r.cat)}`;
+    
+    const ingContainer = document.getElementById('detail-ings');
+    ingContainer.innerHTML = '';
+    r.ings.forEach(i => {
+        const has = state.myIngs.has(i);
+        const div = document.createElement('div');
+        div.className = 'ing-item';
+        div.style.borderColor = has ? 'var(--success)' : 'var(--danger)';
+        div.innerHTML = `
+            <span style="color:${has?'var(--text-main)':'var(--text-muted)'}">${translateIng(i)}</span>
+            ${!has ? `<span class="ing-add-btn" title="Add to shop" onclick="addToShop('${i}')">+</span>` : '<span style="color:var(--success)">✓</span>'}
+        `;
+        ingContainer.appendChild(div);
+    });
+    
+    const stepContainer = document.getElementById('detail-steps');
+    stepContainer.innerHTML = r.steps.map((s, idx) => `
+    <div style="display:flex; gap:12px; margin-bottom:12px">
+        <span style="background:var(--primary); color:black; width:24px; height:24px; border-radius:50%; 
+        display:grid; place-items:center; font-weight:bold; flex-shrink:0">${idx+1}</span>
+        <span>${translateStep(s)}</span>
+    </div>
+`).join('');
+
+
+    openModal('recipe-modal');
+}
+
+// Add Recipe Logic
+document.getElementById('add-form').onsubmit = (e) => {
+    e.preventDefault();
+    const f = new FormData(e.target);
+    const titleText = f.get('title');
+    const newR = {
+        id: 'u' + Date.now(),
+        // user recipes: keep title as plain string for now
+        title: titleText,
+        time: parseInt(f.get('time')),
+        cat: f.get('category'),
+        tags: ['user', 'my'],
+        ings: f.get('ings').split(',').map(s=>s.trim().toLowerCase()).filter(Boolean),
+        steps: f.get('steps').split('\n'),
+        img: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&q=80'
+    };
+    state.userRecipes.push(newR);
+    localStorage.setItem('dk_user_recipes', JSON.stringify(state.userRecipes));
+    closeModal('add-modal');
+    e.target.reset();
+    renderGrid();
+    alert(state.lang==='ua' ? 'Рецепт додано!' : 'Recipe added!');
+};
+
+/* --- 8. AUTH: AJAX LOGIC FOR FLASK --- */
+
+// Update UI after successful login
+function updateAuthUI(userName) {
+    state.user = userName;
+    localStorage.setItem('dk_user', userName);
+    updateGreeting();
+    closeModal('auth-modal');
+}
+
+// Universal auth handler
+function handleAuthForm(formId, actionUrl) {
+    const form = document.getElementById(formId);
+    if (!form) return;
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const formData = new FormData(form);
+
+        try {
+            const response = await fetch(actionUrl, {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await response.json();
+            alert(data.message);
+
+            if (data.success) {
+                updateAuthUI(data.user_name);
+            }
+        } catch (error) {
+            console.error('Fetch error:', error);
+            alert(state.lang === 'ua'
+                  ? 'Помилка з\'єднання з сервером. Перевірте, чи запущено Flask.'
+                  : 'Connection error. Make sure Flask server is running.');
+        }
+    });
+}
+
+// Init auth handlers
+function initAuthHandlers() {
+    handleAuthForm('login-form', 'http://127.0.0.1:5000/api/login');
+    handleAuthForm('register-form', 'http://127.0.0.1:5000/api/register');
+}
+</script>
+</body>
+</html>
